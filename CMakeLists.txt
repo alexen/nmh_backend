@@ -14,6 +14,12 @@ include(GNUInstallDirs)
 
 set(PROJECT_INSTALL_BINARY_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
 
+find_package(Boost REQUIRED
+     COMPONENTS
+          log
+          log_setup
+)
+
 add_subdirectory("extension")
 add_subdirectory("app")
 

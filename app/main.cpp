@@ -15,6 +15,11 @@
 #include <boost/exception/enable_error_info.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
+#include <boost/log/trivial.hpp>
+#include <boost/log/utility/setup/console.hpp>
+#include <boost/log/utility/setup/file.hpp>
+#include <boost/log/utility/setup/common_attributes.hpp>
+
 
 namespace nmh {
 
@@ -24,40 +29,51 @@ void read( std::istream& is, std::ostream& os )
      std::uint32_t len = 0;
      if( !is.read( reinterpret_cast< char* >( &len ), sizeof( len ) ) )
      {
-          BOOST_THROW_EXCEPTION( boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
-               << boost::errinfo_errno{ errno } );
+          BOOST_THROW_EXCEPTION(
+               boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
+                    << boost::errinfo_errno{ errno } );
      }
      std::vector< char > buffer( len );
      if( !is.read( buffer.data(), buffer.size() ) )
      {
-          BOOST_THROW_EXCEPTION( boost::enable_error_info( std::runtime_error{ "nmh data read failed" } )
-               << boost::errinfo_errno{ errno } );
+          BOOST_THROW_EXCEPTION(
+               boost::enable_error_info( std::runtime_error{ "nmh data read failed" } )
+                    << boost::errinfo_errno{ errno } );
      }
      os.write( buffer.data(), buffer.size() );
 }
 
 
-void write( std::ostream& os, const std::string& data, std::ostream& log )
+void write( std::ostream& os, const std::string& data )
 {
-     log << "Write data: " << data << std::endl;
+     BOOST_LOG_TRIVIAL( info )
+          << "Write data: " << data;
+
      const std::uint32_t len = data.size();
      os.write( reinterpret_cast< const char* >( &len ), sizeof( len ) ) << data;
 }
 
 
-}
+} // namespace nmh
 
 
 int main()
 {
-     std::ofstream log{ "/tmp/nmh_backend.log", std::ios_base::app };
+     boost::log::add_common_attributes();
+     boost::log::add_file_log( "/tmp/nmh_backend.log",
+          boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%" );
+     boost::log::add_console_log( std::cerr,
+          boost::log::keywords::format = "%TimeStamp% [%Severity%] %Message%" );
+
+     BOOST_LOG_TRIVIAL( info ) << "Starting nmh backend";
 
      try
      {
           std::ostringstream request;
           nmh::read( std::cin, request );
 
-          log << "Read data: " << request.str() << std::endl;
+          BOOST_LOG_TRIVIAL( info )
+               << "Read data: " << request.str();
 
           std::ostringstream json;
           json << '{'
@@ -71,12 +87,11 @@ int main()
                     << std::quoted( request.str() )
                << '}';
 
-          nmh::write( std::cout, json.str(), log );
+          nmh::write( std::cout, json.str() );
      }
      catch( ... )
      {
-          log << "exception: "
-               << boost::current_exception_diagnostic_information()
-               << std::endl;
+          BOOST_LOG_TRIVIAL( error ) << "exception: "
+               << boost::current_exception_diagnostic_information();
      }
 }
