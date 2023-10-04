@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "@PROJECT_NAME@",
+  "version": "@PROJECT_VERSION@",
+  "description": "@PROJECT_DESCRIPTION@",
+  "app": {
+    "background": {
+      "scripts": ["simon.js"]
+    }
+  },
+  "permissions": [
+    "nativeMessaging"
+  ]
+}

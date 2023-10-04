@@ -1,0 +1,9 @@
+{
+  "name": "@PROJECT_NAME@",
+  "description": "@PROJECT_DESCRIPTION@",
+  "path": "@PROJECT_INSTALL_BINARY_PATH@/@PROJECT_NAME@",
+  "type": "stdio",
+  "allowed_origins": [
+    "@PROJECT_BROWSER_EXTENSION_ID@"
+  ]
+}
