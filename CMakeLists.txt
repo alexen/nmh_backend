@@ -14,7 +14,7 @@ include(GNUInstallDirs)
 
 set(PROJECT_INSTALL_BINARY_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
 
-add_subdirectory("templates")
+add_subdirectory("extension")
 add_subdirectory("app")
 
 install(TARGETS ${PROJECT_NAME})
