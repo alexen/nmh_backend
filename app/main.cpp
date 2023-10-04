@@ -31,6 +31,8 @@
 
 #include <boost/variant.hpp>
 
+#include <boost/lambda/lambda.hpp>
+
 
 namespace nmh {
 
@@ -77,10 +79,17 @@ void write( std::ostream& os, const std::string& data )
 void initLogSinks()
 {
      boost::log::add_common_attributes();
-     boost::log::add_file_log( "/tmp/nmh_backend.log",
-          boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%" );
      boost::log::add_console_log( std::cerr,
           boost::log::keywords::format = "%TimeStamp% [%Severity%] %Message%" );
+     const auto sink = boost::log::add_file_log( "/tmp/nmh_backend.log",
+          boost::log::keywords::format = "[%TimeStamp%] <%Severity%>: %Message%",
+          boost::log::keywords::auto_flush = true,
+          boost::log::keywords::open_mode = std::ios_base::out | std::ios_base::app
+     );
+     sink->locked_backend()->set_open_handler(
+          boost::lambda::_1
+               << "==========[ log started ]==================================================\n"
+          );
 }
 
 
@@ -130,7 +139,6 @@ int main()
      using TeeDevice = boost::iostreams::tee_device< std::istream, std::stringstream >;
      using TeeStream = boost::iostreams::stream< TeeDevice >;
 
-
      try
      {
           initLogSinks();
@@ -144,7 +152,7 @@ int main()
           BOOST_LOG_TRIVIAL( info ) << "Start listening STDIN...";
 
           std::ostringstream request;
-          nmh::read( teeStream, request );
+          nmh::read( std::cin, request );
 
           BOOST_LOG_TRIVIAL( info )
                << "Read data: " << request.str();
