@@ -1,7 +1,7 @@
 var messageCounter = 1
 let simonSays = function(text) {
   chrome.runtime.sendNativeMessage(
-    "alexen.app",
+    "@PROJECT_NAME@",
     {
       messageId: messageCounter++,
       content: text,
