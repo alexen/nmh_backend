@@ -20,6 +20,7 @@ find_package(Boost REQUIRED
      COMPONENTS
           log
           log_setup
+          iostreams
 )
 
 add_subdirectory("extension")

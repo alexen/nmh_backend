@@ -1,6 +1,10 @@
 set(BINARY_NAME ${PROJECT_NAME})
 add_executable(${BINARY_NAME} main.cpp)
-target_link_libraries(${BINARY_NAME} Boost::log Boost::log_setup)
+target_link_libraries(${BINARY_NAME}
+     Boost::log
+     Boost::log_setup
+     Boost::iostreams
+)
 
 set(PROJECT_BROWSER_EXTENSION_ID "chrome-extension://hdljlmlimlofikgjfgbgbcolbkcgbbld/")
 
