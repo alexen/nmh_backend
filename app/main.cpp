@@ -50,7 +50,7 @@ std::string makeResponseTo( const int messageId, boost::string_view message )
      root.put( "replyTo", messageId );
      root.put( "status", "accepted" );
      root.put( "sourceMessage", message );
-     root.put( "timestamp", boost::posix_time::to_simple_string( boost::posix_time::second_clock::local_time() ) );
+     root.put( "timestamp", boost::posix_time::to_iso_extended_string( boost::posix_time::second_clock::local_time() ) );
 
      boost::property_tree::write_json( ostr, root );
 
@@ -88,10 +88,11 @@ int main()
           {
                const auto& [ messageId, content ] = parseMessage( request );
 
-               BOOST_LOG_TRIVIAL( info ) << "Parsed message: id: " << messageId << ", content: " << std::quoted( content );
+               BOOST_LOG_TRIVIAL( info )
+                    << "Parsed message: id: " << messageId
+                    << ", content: " << std::quoted( content );
 
                alexen::nmh::protocol::write( makeResponseTo( messageId, content ), std::cout );
-
           }
           catch( const boost::property_tree::ptree_error& )
           {
