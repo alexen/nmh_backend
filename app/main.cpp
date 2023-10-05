@@ -61,36 +61,38 @@ int main()
           alexen::tools::logger::initFileLog( "/tmp/nmh_backend.log", boost::log::trivial::trace );
           alexen::tools::logger::initOstreamLog( std::cerr, boost::log::trivial::info );
 
-          BOOST_LOG_TRIVIAL( info ) << "Start listening istream...";
-
           std::stringstream request;
-          alexen::nmh::protocol::read( std::cin, request );
-
-          BOOST_LOG_TRIVIAL( info )
-               << "Raw data incoming: " << request.str();
-
-          try
+          while( alexen::nmh::protocol::read( std::cin, request ) )
           {
-               const auto& [ messageId, content ] = parseMessage( request );
-
                BOOST_LOG_TRIVIAL( info )
-                    << "Parsed message: id: " << messageId
-                    << ", content: " << std::quoted( content );
+                    << "Raw data incoming: " << request.str();
 
-               alexen::nmh::protocol::write( makeResponseTo( messageId, content ), std::cout );
-          }
-          catch( const boost::property_tree::ptree_error& )
-          {
-               static const std::string errorResponse =
-                    R"json({
-                         "state": "error",
-                         "reason": "Bad incoming message format"
-                    })json";
+               try
+               {
+                    const auto& [ messageId, content ] = parseMessage( request );
 
-               BOOST_LOG_TRIVIAL( error )
-                    << "exception: " << boost::current_exception_diagnostic_information();
-               alexen::nmh::protocol::write( errorResponse, std::cout );
+                    BOOST_LOG_TRIVIAL( info )
+                         << "Parsed message: id: " << messageId
+                         << ", content: " << std::quoted( content );
+
+                    alexen::nmh::protocol::write( makeResponseTo( messageId, content ), std::cout );
+               }
+               catch( const boost::property_tree::ptree_error& )
+               {
+                    static const std::string errorResponse =
+                         R"json({
+                              "state": "error",
+                              "reason": "Bad incoming message format"
+                         })json";
+
+                    BOOST_LOG_TRIVIAL( error )
+                         << "exception: " << boost::current_exception_diagnostic_information();
+                    alexen::nmh::protocol::write( errorResponse, std::cout );
+               }
+
+               request.str( {} );
           }
+          BOOST_LOG_TRIVIAL( info ) << "Seems to finished working!";
      }
      catch( ... )
      {

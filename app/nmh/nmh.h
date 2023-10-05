@@ -13,7 +13,7 @@ namespace nmh {
 namespace protocol {
 
 
-void read( std::istream& is, std::ostream& os );
+bool read( std::istream& is, std::ostream& os );
 void write( boost::string_view data, std::ostream& os );
 
 
