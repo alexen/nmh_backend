@@ -17,11 +17,15 @@ namespace nmh {
 namespace protocol {
 
 
-void read( std::istream& is, std::ostream& os )
+bool read( std::istream& is, std::ostream& os )
 {
      std::uint32_t len = 0;
      if( !is.read( reinterpret_cast< char* >( &len ), sizeof( len ) ) )
      {
+          if( is.eof() )
+          {
+               return false;
+          }
           BOOST_THROW_EXCEPTION(
                boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
                     << boost::errinfo_errno{ errno } );
@@ -39,6 +43,8 @@ void read( std::istream& is, std::ostream& os )
      os.write( buffer.data(), buffer.size() );
 
      BOOST_LOG_TRIVIAL( trace ) << "nmh::read: bytes read: " << is.gcount();
+
+     return true;
 }
 
 
