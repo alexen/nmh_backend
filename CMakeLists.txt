@@ -22,9 +22,12 @@ find_package(Boost REQUIRED
           log
           log_setup
           iostreams
+          unit_test_framework
 )
 
 add_compile_options(-Wall -Werror -pedantic)
+
+include(CTest)
 
 add_subdirectory("extension")
 add_subdirectory("app")
