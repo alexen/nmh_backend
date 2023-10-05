@@ -1,13 +1,32 @@
-var messageCounter = 1
-let simonSays = function(text) {
+var messageIdCounter = 1
+
+function makeTransportPackage(content) {
+  return {
+    messageId: messageIdCounter++,
+    content: content,
+    timestamp: new Date().toISOString()
+  }
+}
+
+var port = chrome.runtime.connectNative("@PROJECT_NAME@");
+
+port.onMessage.addListener(function(message) {
+  console.log(message);
+});
+
+port.onDisconnect.addListener(function() {
+  console.log("Disconnected from @PROJECT_NAME@");
+});
+
+var simonSays = function(content) {
   chrome.runtime.sendNativeMessage(
     "@PROJECT_NAME@",
-    {
-      messageId: messageCounter++,
-      content: text,
-      timestamp: new Date().toISOString()
-    },
+    makeTransportPackage(content),
     function(response){
       console.log(response);
-  })
+  });
+}
+
+var simonSays2 = function(message) {
+  port.postMessage(makeTransportPackage(message));
 }
