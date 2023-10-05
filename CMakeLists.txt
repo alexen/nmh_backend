@@ -24,6 +24,8 @@ find_package(Boost REQUIRED
           iostreams
 )
 
+add_compile_options(-Wall -Werror -pedantic)
+
 add_subdirectory("extension")
 add_subdirectory("app")
 
