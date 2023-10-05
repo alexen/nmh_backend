@@ -6,8 +6,6 @@ target_link_libraries(${BINARY_NAME}
      Boost::iostreams
 )
 
-set(PROJECT_BROWSER_EXTENSION_ID "chrome-extension://hdljlmlimlofikgjfgbgbcolbkcgbbld/")
-
 set(TARGET_FILE ${CMAKE_BINARY_DIR}/${PROJECT_NAME}.json)
 
 configure_file(
