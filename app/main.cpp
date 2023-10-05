@@ -13,10 +13,6 @@
 #include <boost/exception/enable_error_info.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/log/trivial.hpp>
-#include <boost/iostreams/tee.hpp>
-#include <boost/iostreams/stream.hpp>
-#include <boost/algorithm/hex.hpp>
-#include <boost/utility/string_view.hpp>
 #include <boost/variant.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -60,19 +56,10 @@ std::string makeResponseTo( const int messageId, boost::string_view message )
 
 int main()
 {
-     using TeeDevice = boost::iostreams::tee_device< std::istream, std::stringstream >;
-     using TeeStream = boost::iostreams::stream< TeeDevice >;
-
      try
      {
-          alexen::tools::logger::initFileLog( "/tmp/nmh_backend.log" );
-          alexen::tools::logger::initOstreamLog( std::cerr );
-
-          std::stringstream ioss{
-               std::ios_base::in | std::ios_base::out | std::ios_base::binary
-          };
-          TeeDevice teeDevice{ std::cin, ioss };
-          TeeStream teeStream{ teeDevice };
+          alexen::tools::logger::initFileLog( "/tmp/nmh_backend.log", boost::log::trivial::trace );
+          alexen::tools::logger::initOstreamLog( std::cerr, boost::log::trivial::info );
 
           BOOST_LOG_TRIVIAL( info ) << "Start listening istream...";
 
@@ -81,8 +68,6 @@ int main()
 
           BOOST_LOG_TRIVIAL( info )
                << "Raw data incoming: " << request.str();
-          BOOST_LOG_TRIVIAL( debug )
-               << "Tee stream: " << alexen::tools::converter::Hexlify{ ioss };
 
           try
           {
