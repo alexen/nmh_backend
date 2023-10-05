@@ -7,14 +7,15 @@ project(nmh_backend
 )
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-     set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local CACHE PATH "" FORCE)
+     set(CMAKE_INSTALL_PREFIX $ENV{HOME}/.local/${PROJECT_NAME} CACHE PATH "" FORCE)
 endif()
 
+option(BUILD_SHARED_LIBS "Build shared libs by default" ON)
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -O0 -fno-inline")
 
 include(GNUInstallDirs)
 
-set(PROJECT_INSTALL_BINARY_PATH ${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR})
+set(CMAKE_INSTALL_RPATH $ORIGIN/../${CMAKE_INSTALL_LIBDIR})
 
 find_package(Boost REQUIRED
      COMPONENTS
@@ -22,6 +23,8 @@ find_package(Boost REQUIRED
           log_setup
           iostreams
 )
+
+add_compile_options(-Wall -Werror -pedantic)
 
 add_subdirectory("extension")
 add_subdirectory("app")

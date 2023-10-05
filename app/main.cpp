@@ -4,170 +4,93 @@
 
 #include <unistd.h>
 
-#include <vector>
 #include <sstream>
-#include <fstream>
 #include <iostream>
 
 #include <boost/date_time.hpp>
-
 #include <boost/throw_exception.hpp>
-
 #include <boost/exception/errinfo_errno.hpp>
 #include <boost/exception/enable_error_info.hpp>
 #include <boost/exception/diagnostic_information.hpp>
-
 #include <boost/log/trivial.hpp>
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/setup/file.hpp>
-#include <boost/log/utility/setup/common_attributes.hpp>
-
-#include <boost/iostreams/tee.hpp>
-#include <boost/iostreams/stream.hpp>
-
-#include <boost/algorithm/hex.hpp>
-
-#include <boost/utility/string_view.hpp>
-
 #include <boost/variant.hpp>
-
 #include <boost/lambda/lambda.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+#include "nmh/nmh.h"
+#include "tools/logger/init.h"
+#include "tools/converter/hexlify.h"
 
 
-namespace nmh {
-
-
-void read( std::istream& is, std::ostream& os )
+std::tuple< int, std::string > parseMessage( std::istream& is )
 {
-     std::uint32_t len = 0;
-     if( !is.read( reinterpret_cast< char* >( &len ), sizeof( len ) ) )
-     {
-          BOOST_THROW_EXCEPTION(
-               boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
-                    << boost::errinfo_errno{ errno } );
-     }
+     boost::property_tree::ptree root;
+     boost::property_tree::read_json( is, root );
 
-     BOOST_LOG_TRIVIAL( debug ) << "nmh: incoming bytes: " << len;
-
-     std::vector< char > buffer( len );
-     if( !is.read( buffer.data(), buffer.size() ) )
-     {
-          BOOST_THROW_EXCEPTION(
-               boost::enable_error_info( std::runtime_error{ "nmh data read failed" } )
-                    << boost::errinfo_errno{ errno } );
-     }
-     os.write( buffer.data(), buffer.size() );
-
-     BOOST_LOG_TRIVIAL( debug ) << "nmh: received bytes: " << is.gcount();
+     return {
+          root.get< int >( "messageId" ),
+          root.get< std::string >( "content" )
+     };
 }
 
 
-void write( std::ostream& os, const std::string& data )
+std::string makeResponseTo( const int messageId, boost::string_view message )
 {
-     BOOST_LOG_TRIVIAL( info )
-          << "Write data: " << data;
+     static std::ostringstream ostr;
 
-     const std::uint32_t len = data.size();
-     os.write( reinterpret_cast< const char* >( &len ), sizeof( len ) )
-          << data;
-}
+     ostr.str( {} );
 
+     boost::property_tree::ptree root;
 
-} // namespace nmh
+     root.put( "processId", getpid() );
+     root.put( "replyTo", messageId );
+     root.put( "status", "accepted" );
+     root.put( "sourceMessage", message );
+     root.put( "timestamp", boost::posix_time::to_iso_extended_string( boost::posix_time::second_clock::local_time() ) );
 
+     boost::property_tree::write_json( ostr, root );
 
-void initLogSinks()
-{
-     boost::log::add_common_attributes();
-     boost::log::add_console_log( std::cerr,
-          boost::log::keywords::format = "%TimeStamp% [%Severity%] %Message%" );
-     boost::log::add_file_log( "/tmp/nmh_backend.log",
-          boost::log::keywords::format = "[%TimeStamp%] {%ProcessID%.%ThreadID%} <%Severity%>: %Message%",
-          boost::log::keywords::auto_flush = true,
-          boost::log::keywords::open_mode = std::ios_base::out | std::ios_base::app
-     );
-}
-
-
-struct Hexlify {
-     using InputVariant = boost::variant< boost::string_view, std::istream& >;
-
-     explicit Hexlify( InputVariant&& v ) : input{ v } {}
-
-     InputVariant input;
-};
-
-
-struct HexlifyVisitor : boost::static_visitor<> {
-     explicit HexlifyVisitor( std::ostream& os ) : ostr{ os } {}
-
-     void operator()( std::istream& is ) const
-     {
-          boost::algorithm::hex_lower(
-               std::istreambuf_iterator< char >{ is },
-               {},
-               std::ostreambuf_iterator< char >{ ostr }
-               );
-     }
-
-     void operator()( boost::string_view sv ) const
-     {
-          boost::algorithm::hex_lower(
-               sv.cbegin(),
-               sv.cend(),
-               std::ostreambuf_iterator< char >{ ostr }
-               );
-     }
-
-     std::ostream& ostr;
-};
-
-
-std::ostream& operator<<( std::ostream& os, const Hexlify& h )
-{
-     boost::apply_visitor( HexlifyVisitor{ os }, h.input );
-     return os;
+     return ostr.str();
 }
 
 
 int main()
 {
-     using TeeDevice = boost::iostreams::tee_device< std::istream, std::stringstream >;
-     using TeeStream = boost::iostreams::stream< TeeDevice >;
-
      try
      {
-          initLogSinks();
+          alexen::tools::logger::initFileLog( "/tmp/nmh_backend.log", boost::log::trivial::trace );
+          alexen::tools::logger::initOstreamLog( std::cerr, boost::log::trivial::info );
 
-          std::stringstream ioss{
-               std::ios_base::in | std::ios_base::out | std::ios_base::binary
-          };
-          TeeDevice teeDevice{ std::cin, ioss };
-          TeeStream teeStream{ teeDevice };
+          BOOST_LOG_TRIVIAL( info ) << "Start listening istream...";
 
-          BOOST_LOG_TRIVIAL( info ) << "Start listening STDIN...";
-
-          std::ostringstream request;
-          nmh::read( std::cin, request );
+          std::stringstream request;
+          alexen::nmh::protocol::read( std::cin, request );
 
           BOOST_LOG_TRIVIAL( info )
-               << "Read data: " << request.str();
-          BOOST_LOG_TRIVIAL( debug )
-               << "Tee stream: " << Hexlify{ ioss };
+               << "Raw data incoming: " << request.str();
 
-          std::ostringstream json;
-          json << '{'
-               << std::quoted( "processId" ) << ':'
-                    << getpid() << ','
-               << std::quoted( "greeting" ) << ':'
-                    << std::quoted( "Hello, my dear friend!" ) << ','
-               << std::quoted( "timestamp" ) << ':'
-                    << std::quoted( boost::posix_time::to_simple_string( boost::posix_time::second_clock::local_time() ) ) << ','
-               << std::quoted( "sourceMessage" ) << ':'
-                    << std::quoted( request.str() )
-               << '}';
+          try
+          {
+               const auto& [ messageId, content ] = parseMessage( request );
 
-          nmh::write( std::cout, json.str() );
+               BOOST_LOG_TRIVIAL( info )
+                    << "Parsed message: id: " << messageId
+                    << ", content: " << std::quoted( content );
+
+               alexen::nmh::protocol::write( makeResponseTo( messageId, content ), std::cout );
+          }
+          catch( const boost::property_tree::ptree_error& )
+          {
+               static const std::string errorResponse =
+                    R"json({
+                         "state": "error",
+                         "reason": "Bad incoming message format"
+                    })json";
+
+               BOOST_LOG_TRIVIAL( error )
+                    << "exception: " << boost::current_exception_diagnostic_information();
+               alexen::nmh::protocol::write( errorResponse, std::cout );
+          }
      }
      catch( ... )
      {
