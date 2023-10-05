@@ -26,6 +26,9 @@ void read( std::istream& is, std::ostream& os )
                boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
                     << boost::errinfo_errno{ errno } );
      }
+
+     BOOST_LOG_TRIVIAL( trace ) << "nmh::read: bytes expected: " << len;
+
      std::vector< char > buffer( len );
      if( !is.read( buffer.data(), buffer.size() ) )
      {
@@ -34,11 +37,17 @@ void read( std::istream& is, std::ostream& os )
                     << boost::errinfo_errno{ errno } );
      }
      os.write( buffer.data(), buffer.size() );
+
+     BOOST_LOG_TRIVIAL( trace ) << "nmh::read: bytes read: " << is.gcount();
 }
 
 
 void write( boost::string_view data, std::ostream& os )
 {
+     BOOST_LOG_TRIVIAL( trace )
+          << "nmh::write: outgoing message: len: " << data.size()
+          << ", content: " << data;
+
      const std::uint32_t len = data.size();
      os.write( reinterpret_cast< const char* >( &len ), sizeof( len ) )
           << data;
