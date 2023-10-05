@@ -19,12 +19,14 @@ namespace protocol {
 
 bool read( std::istream& is, std::ostream& os )
 {
+     static constexpr bool success = true;
+
      std::uint32_t len = 0;
      if( !is.read( reinterpret_cast< char* >( &len ), sizeof( len ) ) )
      {
           if( is.eof() )
           {
-               return false;
+               return !success;
           }
           BOOST_THROW_EXCEPTION(
                boost::enable_error_info( std::runtime_error{ "nmh len read failed" } )
@@ -44,7 +46,7 @@ bool read( std::istream& is, std::ostream& os )
 
      BOOST_LOG_TRIVIAL( trace ) << "nmh::read: bytes read: " << is.gcount();
 
-     return true;
+     return success;
 }
 
 
