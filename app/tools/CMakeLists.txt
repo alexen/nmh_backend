@@ -15,7 +15,10 @@ target_link_libraries(
      ${THIS}
      PRIVATE
           Boost::log_setup
+          Boost::thread
 )
+
+add_subdirectory("examples")
 
 if(BUILD_TESTING)
      set(UNIT_TEST ${THIS}-test)

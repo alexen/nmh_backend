@@ -23,6 +23,7 @@ find_package(Boost REQUIRED
           log_setup
           iostreams
           unit_test_framework
+          thread
 )
 
 add_compile_options(-Wall -Werror -pedantic)
