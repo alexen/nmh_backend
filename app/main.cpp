@@ -12,6 +12,7 @@
 #include <boost/date_time.hpp>
 #include <boost/make_shared.hpp>
 #include <boost/throw_exception.hpp>
+#include <boost/optional/optional.hpp>
 #include <boost/exception/errinfo_errno.hpp>
 #include <boost/exception/enable_error_info.hpp>
 #include <boost/exception/diagnostic_information.hpp>
@@ -29,26 +30,26 @@
 using RequestPtr = boost::shared_ptr< struct Request >;
 
 struct Request {
-     static RequestPtr fromJson( std::istream& is )
+     static RequestPtr parse( std::istream& is )
      {
           boost::property_tree::ptree root;
           boost::property_tree::read_json( is, root );
 
           return boost::make_shared< Request >(
-               root.get< int >( "messageId" ),
-               root.get< std::string >( "content" ),
+               root.get< int >( "id" ),
+               root.get< std::string >( "message" ),
                root.get< std::string >( "timestamp" )
                );
      }
 
      Request( std::uint32_t msgId, std::string&& content, std::string&& tstamp )
-          : messageId{ msgId }
+          : id{ msgId }
           , content{ content }
           , timestamp{ tstamp }
      {}
 
-     std::uint32_t messageId;
-     std::string content;
+     std::uint32_t id;
+     std::string message;
      std::string timestamp;
 };
 
@@ -56,8 +57,8 @@ struct Request {
 std::ostream& operator<<( std::ostream& os, const Request& rq )
 {
      return os
-          << "message: id: " << rq.messageId
-          << ", content: " << rq.content
+          << "message: id: " << rq.id
+          << ", message: " << rq.message
           << ", at " << rq.timestamp;
 }
 
@@ -65,37 +66,26 @@ std::ostream& operator<<( std::ostream& os, const Request& rq )
 using ResponsePtr = boost::shared_ptr< struct Response >;
 
 struct Response {
-     std::string toJson( const int messageId, boost::string_view message )
+     void serialize( std::ostream& os )
      {
-          /// Делаем статический поток, но отдельный для каждого потока,
-          /// для чего используем boost::thread_specific_ptr<>
-          static boost::thread_specific_ptr< std::ostringstream > oss;
-          if( !oss.get() )
-          {
-               oss.reset( new std::ostringstream );
-          }
-
-          /// Поскольку буфер статический, очистку выполняем при каждом обращении.
-          /// Такой метод работы самый быстрый.
-          oss->str( {} );
-
           boost::property_tree::ptree root;
 
-          root.put( "processId", getpid() );
-          root.put( "replyTo", messageId );
-          root.put( "status", "accepted" );
-          root.put( "sourceMessage", message );
+          root.put( "id", id );
+          if( replyTo )
+          {
+               root.put( "replyTo", replyTo );
+          }
+          root.put( "status", status );
+          root.put( "message", message );
           root.put( "timestamp", boost::posix_time::to_iso_extended_string( boost::posix_time::second_clock::local_time() ) );
 
-          boost::property_tree::write_json( *oss, root );
-
-          return oss->str();
+          boost::property_tree::write_json( os, root );
      }
 
-     std::uint32_t messageId;
-     std::uint32_t inReplyTo;
+     std::uint32_t id;
+     boost::optional< std::uint32_t > replyTo;
      std::string status;
-     std::string content;
+     std::string message;
      std::string timestamp;
 };
 
@@ -118,7 +108,7 @@ void requestListener( RequestQueue& requestQueue )
 
                try
                {
-                    requestQueue.push( Request::fromJson( request ) );
+                    requestQueue.push( Request::parse( request ) );
                }
                catch( const std::exception& )
                {

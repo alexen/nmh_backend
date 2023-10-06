@@ -1,9 +1,9 @@
 var messageIdCounter = 1
 
-function makeTransportPackage(content) {
+function makeTransportPackage(message) {
   return {
-    messageId: messageIdCounter++,
-    content: content,
+    id: messageIdCounter++,
+    message: message,
     timestamp: new Date().toISOString()
   }
 }
@@ -18,10 +18,10 @@ port.onDisconnect.addListener(function() {
   console.log("Disconnected from @PROJECT_NAME@");
 });
 
-var simonSays = function(content) {
+var simonSays = function(message) {
   chrome.runtime.sendNativeMessage(
     "@PROJECT_NAME@",
-    makeTransportPackage(content),
+    makeTransportPackage(message),
     function(response){
       console.log(response);
   });
