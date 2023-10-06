@@ -7,7 +7,8 @@
 #include <sstream>
 #include <boost/test/unit_test.hpp>
 
-#include "../nmh.h"
+#include <nmh/nmh.h>
+
 
 BOOST_AUTO_TEST_SUITE( NmhIo )
 BOOST_AUTO_TEST_SUITE( Read )

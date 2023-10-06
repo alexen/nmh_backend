@@ -2,7 +2,7 @@
 /// @brief
 /// @copyright Copyright 2023 InfoTeCS Internet Trust
 
-#include "nmh.h"
+#include <nmh/nmh.h>
 
 #include <iostream>
 

@@ -17,9 +17,9 @@
 #include <boost/lambda/lambda.hpp>
 #include <boost/property_tree/json_parser.hpp>
 
-#include "nmh/nmh.h"
-#include "tools/logger/init.h"
-#include "tools/converter/hexlify.h"
+#include <nmh/nmh.h>
+#include <tools/logger/init.h>
+#include <tools/converter/hexlify.h>
 
 
 std::tuple< int, std::string > parseMessage( std::istream& is )
