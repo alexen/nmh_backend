@@ -15,7 +15,10 @@ target_link_libraries(
      ${THIS}
      PRIVATE
           Boost::log_setup
+          Boost::thread
 )
+
+add_subdirectory("examples")
 
 if(BUILD_TESTING)
      set(UNIT_TEST ${THIS}-test)
@@ -23,7 +26,7 @@ if(BUILD_TESTING)
      target_sources(
           ${UNIT_TEST}
           PRIVATE
-               test/hexlify_test.cpp
+               tests/hexlify_test.cpp
      )
      target_link_libraries(
           ${UNIT_TEST}
