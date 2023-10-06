@@ -23,7 +23,7 @@ if(BUILD_TESTING)
      target_sources(
           ${UNIT_TEST}
           PRIVATE
-               test/hexlify_test.cpp
+               tests/hexlify_test.cpp
      )
      target_link_libraries(
           ${UNIT_TEST}
