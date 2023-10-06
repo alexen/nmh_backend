@@ -2,7 +2,7 @@
 /// @brief
 /// @copyright Copyright 2023 InfoTeCS Internet Trust
 
-#include "init.h"
+#include <tools/logger/init.h>
 
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/setup/file.hpp>

@@ -2,7 +2,7 @@
 /// @brief
 /// @copyright Copyright 2023 InfoTeCS Internet Trust
 
-#include "hexlify.h"
+#include <tools/converter/hexlify.h>
 
 #include <boost/algorithm/hex.hpp>
 

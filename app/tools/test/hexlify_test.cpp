@@ -8,7 +8,7 @@
 
 #include <boost/test/unit_test.hpp>
 
-#include "../converter/hexlify.h"
+#include <tools/converter/hexlify.h>
 
 
 BOOST_AUTO_TEST_SUITE( Tools )
