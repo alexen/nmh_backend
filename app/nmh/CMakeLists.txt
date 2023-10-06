@@ -1,40 +1,40 @@
-set(LIBNAME nmh)
+set(THIS nmh)
 
-add_library(${LIBNAME})
+add_library(${THIS})
 
 target_sources(
-     ${LIBNAME}
+     ${THIS}
      PRIVATE
           nmh.cpp
      PUBLIC
           nmh.h
 )
 target_include_directories(
-     ${LIBNAME}
+     ${THIS}
      PRIVATE
           ${CMAKE_CURRENT_SOURCE_DIR}
 )
 target_link_libraries(
-     ${LIBNAME}
+     ${THIS}
      PRIVATE
           Boost::log
 )
 
 if(BUILD_TESTING)
-     set(LIB_TEST ${LIBNAME}-test)
-     add_executable(${LIB_TEST})
+     set(UNIT_TEST ${THIS}-test)
+     add_executable(${UNIT_TEST})
      target_sources(
-          ${LIB_TEST}
+          ${UNIT_TEST}
           PRIVATE
                test/nmh_test.cpp
      )
      target_link_libraries(
-          ${LIB_TEST}
+          ${UNIT_TEST}
           PRIVATE
-               ${LIBNAME}
+               ${THIS}
                Boost::unit_test_framework
      )
-     add_test(${LIBNAME} ${LIB_TEST})
+     add_test(${THIS} ${UNIT_TEST})
 endif()
 
-install(TARGETS ${LIBNAME})
+install(TARGETS ${THIS})
