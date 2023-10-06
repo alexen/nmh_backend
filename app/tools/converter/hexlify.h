@@ -32,22 +32,32 @@ struct HexlifyVisitor : boost::static_visitor<> {
           : ostr{ os }
      {}
 
+     struct Rewinder
+     {
+          explicit Rewinder( std::istream& is )
+               : istr{ is }
+               , saved{ is.tellg() }
+          {}
+          ~Rewinder() {
+               istr.seekg( saved - istr.tellg(), std::ios_base::cur );
+          }
+
+          std::istream& istr;
+          const std::istream::pos_type saved;
+     };
+
      void operator()( std::istream& is ) const
      {
-          boost::algorithm::hex_lower(
-               std::istreambuf_iterator< char >{ is },
-               {},
-               std::ostreambuf_iterator< char >{ ostr }
-               );
+          Rewinder _{ is };
+
+          boost::algorithm::hex_lower( std::istreambuf_iterator< char >{ is }, {},
+               std::ostreambuf_iterator< char >{ ostr } );
      }
 
      void operator()( boost::string_view sv ) const
      {
-          boost::algorithm::hex_lower(
-               sv.cbegin(),
-               sv.cend(),
-               std::ostreambuf_iterator< char >{ ostr }
-               );
+          boost::algorithm::hex_lower( sv.cbegin(), sv.cend(),
+               std::ostreambuf_iterator< char >{ ostr } );
      }
 
      std::ostream& ostr;
