@@ -1,24 +1,20 @@
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
 add_subdirectory("nmh")
 add_subdirectory("tools")
 
-set(BINARY_NAME ${PROJECT_NAME})
+set(THIS ${PROJECT_NAME})
 
-add_executable(${BINARY_NAME})
+add_executable(${THIS})
 
 target_sources(
-     ${BINARY_NAME}
+     ${THIS}
      PRIVATE
           main.cpp
 )
 
-target_include_directories(
-     ${BINARY_NAME}
-     PRIVATE
-          ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 target_link_libraries(
-     ${BINARY_NAME}
+     ${THIS}
      PRIVATE
           nmh
           tools
