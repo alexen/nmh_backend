@@ -19,7 +19,7 @@ namespace logger {
 void initFileLog(
      const boost::filesystem::path& path,
      boost::log::trivial::severity_level minLevel = boost::log::trivial::info,
-     std::ios_base::openmode mode = std::ios_base::out | std::ios_base::app,
+     std::ios_base::openmode mode = std::ios_base::out,
      boost::string_view fmt = "[%TimeStamp%] {%ProcessID%.%ThreadID%} <%Severity%>: %Message%"
 );
 
