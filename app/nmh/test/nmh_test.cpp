@@ -33,9 +33,15 @@ BOOST_AUTO_TEST_CASE( ReadValidData )
 
      std::ostringstream oss;
      bool success = true;
+
+     /// Первое чтение возвращает результат true и данные в полном соответствии с исходной строкой.
      BOOST_REQUIRE_NO_THROW( success = read( ioss, oss ) );
      BOOST_TEST( success );
      BOOST_TEST( oss.str() == source );
+
+     /// Второе чтение этого же потока не должно выбрасывать исключение, но должно возвращать false
+     BOOST_REQUIRE_NO_THROW( success = read( ioss, oss ) );
+     BOOST_TEST( !success );
 }
 BOOST_AUTO_TEST_CASE( ReadInvalidData )
 {
