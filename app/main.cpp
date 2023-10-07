@@ -86,13 +86,20 @@ using RequestQueue = alexen::tools::mt::BlockingQueue< RequestPtr >;
 using ResponseQueue = alexen::tools::mt::BlockingQueue< ResponsePtr >;
 
 
+std::string getIsoTimestamp()
+{
+    return boost::posix_time::to_iso_extended_string(
+         boost::posix_time::second_clock::local_time() );
+}
+
+
 void requestListener( RequestQueue& requestQueue, ResponseQueue& responseQueue )
 {
      static const auto makeErrorResponse = []( const std::string& message ){
           auto response = boost::make_shared< Response >();
           response->status = "error";
           response->message = message;
-          response->timestamp = boost::posix_time::to_iso_extended_string( boost::posix_time::second_clock::local_time() );
+          response->timestamp = getIsoTimestamp();
           return response;
      };
 
@@ -114,7 +121,7 @@ void requestListener( RequestQueue& requestQueue, ResponseQueue& responseQueue )
                {
                     BOOST_LOG_TRIVIAL( error )
                          << "exception: " << boost::current_exception_diagnostic_information();
-                    responseQueue.push( makeErrorResponse( e.what() ) );
+                    responseQueue.push( std::move( makeErrorResponse( e.what() ) ) );
                }
 
                request.str( {} );
@@ -130,7 +137,7 @@ void requestListener( RequestQueue& requestQueue, ResponseQueue& responseQueue )
 }
 
 
-void requestProcessor( RequestQueue& requestQueue, ResponseQueue& )
+void requestProcessor( RequestQueue& requestQueue, ResponseQueue& responseQueue )
 {
      BOOST_LOG_TRIVIAL( info ) << __FUNCTION__ << " started";
 
@@ -140,6 +147,15 @@ void requestProcessor( RequestQueue& requestQueue, ResponseQueue& )
           {
                const auto request = requestQueue.pop();
                BOOST_LOG_TRIVIAL( info ) << "Processing: " << *request;
+
+               auto response = boost::make_shared< Response >();
+
+               response->replyTo = request->id;
+               response->message = "This is response message";
+               response->status = "processed";
+               response->timestamp = getIsoTimestamp();
+
+               responseQueue.push( std::move( response ) );
           }
      }
      catch( const std::exception& )
