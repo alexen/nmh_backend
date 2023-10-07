@@ -196,13 +196,6 @@ int main()
           boost::thread_group tg;
           tg.create_thread(
                boost::bind(
-                    requestListener,
-                    boost::ref( requestQueue ),
-                    boost::ref( responseQueue )
-                    )
-               );
-          tg.create_thread(
-               boost::bind(
                     requestProcessor,
                     boost::ref( requestQueue ),
                     boost::ref( responseQueue )
@@ -221,6 +214,12 @@ int main()
                     boost::ref( responseQueue )
                     )
                );
+
+          requestListener( requestQueue, responseQueue );
+
+          BOOST_LOG_TRIVIAL( info ) << "Input stream closed, finish working";
+
+          tg.interrupt_all();
           tg.join_all();
 
           BOOST_LOG_TRIVIAL( info ) << "Main thread finished";
