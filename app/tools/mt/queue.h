@@ -24,11 +24,16 @@ class BlockingQueue
 public:
      BlockingQueue() = default;
 
-     void push( T value )
+     void push( T&& value )
      {
           boost::lock_guard< boost::mutex > lock{ m_ };
-          queue_.push_back( std::move( value ) );
+          queue_.push_back( value );
           cv_.notify_one();
+     }
+
+     void push( const T& value )
+     {
+          push( std::move( value ) );
      }
 
      T pop()
