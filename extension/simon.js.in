@@ -2,11 +2,11 @@ var messageIdCounter = 1
 
 function makeTransportPackage(message) {
   return {
-    id: messageIdCounter++,
-    module: "moduleName",
-    method: "moduleMethod"
-    data: message,
-    timestamp: new Date().toISOString()
+    id: messageIdCounter++
+    , module: "moduleName"
+    , method: "moduleMethod"
+    , data: message
+    , timestamp: new Date().toISOString()
   }
 }
 
