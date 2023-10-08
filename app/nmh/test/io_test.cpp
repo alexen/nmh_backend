@@ -7,13 +7,13 @@
 #include <sstream>
 #include <boost/test/unit_test.hpp>
 
-#include <nmh/nmh.h>
+#include <nmh/io.h>
 
 
 BOOST_AUTO_TEST_SUITE( NmhIo )
 BOOST_AUTO_TEST_SUITE( Read )
 
-using alexen::nmh::protocol::read;
+using alexen::nmh::io::read;
 
 BOOST_AUTO_TEST_CASE( ReadEmptyStream )
 {
@@ -55,7 +55,7 @@ BOOST_AUTO_TEST_CASE( ReadInvalidData )
 BOOST_AUTO_TEST_SUITE_END() // Read
 BOOST_AUTO_TEST_SUITE( Write )
 
-using alexen::nmh::protocol::write;
+using alexen::nmh::io::write;
 
 BOOST_AUTO_TEST_CASE( WriteEmptyData )
 {

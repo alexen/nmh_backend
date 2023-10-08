@@ -20,8 +20,7 @@
 #include <boost/variant.hpp>
 #include <boost/lambda/lambda.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
-#include <nmh/nmh.h>
+#include <nmh/io.h>
 #include <tools/logger/init.h>
 #include <tools/converter/hexlify.h>
 #include <tools/mt/queue.h>
@@ -108,7 +107,7 @@ void requestListener( RequestQueue& requestQueue, ResponseQueue& responseQueue )
      try
      {
           std::stringstream request;
-          while( alexen::nmh::protocol::read( std::cin, request ) )
+          while( alexen::nmh::io::read( std::cin, request ) )
           {
                BOOST_LOG_TRIVIAL( debug )
                     << "Received: " << request.str();
@@ -184,7 +183,7 @@ void responseWriter( ResponseQueue& responseQueue )
           {
                oss->str( {} );
                responseQueue.pop()->serialize( *oss );
-               alexen::nmh::protocol::write( oss->str(), std::cout );
+               alexen::nmh::io::write( oss->str(), std::cout );
           }
      }
      catch( const std::exception& )

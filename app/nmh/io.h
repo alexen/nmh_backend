@@ -10,13 +10,13 @@
 
 namespace alexen {
 namespace nmh {
-namespace protocol {
+namespace io {
 
 
 bool read( std::istream& is, std::ostream& os );
 void write( boost::string_view data, std::ostream& os );
 
 
-} // namespace protocol
+} // namespace io
 } // namespace nmh
 } // namespace alexen

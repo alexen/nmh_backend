@@ -2,19 +2,18 @@
 /// @brief
 /// @copyright Copyright 2023 InfoTeCS Internet Trust
 
-#include <nmh/nmh.h>
-
 #include <iostream>
 
 #include <boost/log/trivial.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/exception/enable_error_info.hpp>
 #include <boost/exception/errinfo_errno.hpp>
+#include <nmh/io.h>
 
 
 namespace alexen {
 namespace nmh {
-namespace protocol {
+namespace io {
 
 
 bool read( std::istream& is, std::ostream& os )
