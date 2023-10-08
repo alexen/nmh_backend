@@ -3,9 +3,17 @@ var messageIdCounter = 1
 function makeTransportPackage(message) {
   return {
     id: messageIdCounter++
-    , module: "moduleName"
-    , method: "moduleMethod"
-    , data: message
+    , message: message
+    , timestamp: new Date().toISOString()
+  }
+}
+
+function makeRequest(module, method, data) {
+  return {
+    id: messageIdCounter++
+    , module: module
+    , method: method
+    , data: data
     , timestamp: new Date().toISOString()
   }
 }
@@ -22,4 +30,8 @@ port.onDisconnect.addListener(function() {
 
 var simonSays = function(message) {
   port.postMessage(makeTransportPackage(message));
+}
+
+var simonCall = function(module, method, data) {
+  port.postMessage(makeRequest(module, method, data));
 }
