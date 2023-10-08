@@ -2,12 +2,23 @@ set(THIS nmh)
 
 add_library(${THIS})
 
+target_compile_definitions(
+     ${THIS}
+     PRIVATE
+          BOOST_BIND_GLOBAL_PLACEHOLDERS
+)
 target_sources(
      ${THIS}
      PRIVATE
           io.cpp
+          request.cpp
+          response.cpp
+          workers.cpp
      PUBLIC
           io.h
+          request.h
+          response.h
+          workers.h
 )
 target_link_libraries(
      ${THIS}
