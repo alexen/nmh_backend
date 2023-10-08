@@ -5,6 +5,7 @@
 #include <iostream>
 
 #include <boost/bind/bind.hpp>
+#include <boost/make_shared.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/log/trivial.hpp>
@@ -15,6 +16,16 @@
 #include <tools/logger/init.h>
 #include <tools/converter/hexlify.h>
 #include <tools/mt/queue.h>
+
+#include <handlers/echo.h>
+
+
+template< typename Handler, typename ...Args >
+alexen::handler::IHandlerMap::value_type makeHandlerEntry( Args&& ...args)
+{
+     auto handler = boost::make_shared< Handler >( std::forward< Args >( args )... );
+     return { handler->name().to_string(), handler };
+}
 
 
 int main()
@@ -28,7 +39,9 @@ int main()
 
           alexen::nmh::mt::RequestQueue requestQueue;
           alexen::nmh::mt::ResponseQueue responseQueue;
-          alexen::handler::IHandlerMap handlers;
+          alexen::handler::IHandlerMap handlers{
+               makeHandlerEntry< alexen::handler::EchoHandler >()
+          };
 
           boost::thread_group tg;
 
