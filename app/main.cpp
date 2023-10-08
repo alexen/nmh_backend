@@ -28,6 +28,7 @@ int main()
 
           alexen::nmh::mt::RequestQueue requestQueue;
           alexen::nmh::mt::ResponseQueue responseQueue;
+          alexen::handler::IHandlerMap handlers;
 
           boost::thread_group tg;
 
@@ -36,18 +37,19 @@ int main()
           {
                tg.create_thread(
                     boost::bind(
-                         alexen::nmh::mt::workers::requestProcessor,
-                         boost::ref( requestQueue ),
-                         boost::ref( responseQueue )
+                         alexen::nmh::mt::workers::requestProcessor
+                         , boost::ref( requestQueue )
+                         , boost::ref( responseQueue )
+                         , boost::cref( handlers )
                          )
                     );
           }
 
           tg.create_thread(
                boost::bind(
-                    alexen::nmh::mt::workers::ostreamWriter,
-                    boost::ref( std::cout ),
-                    boost::ref( responseQueue )
+                    alexen::nmh::mt::workers::ostreamWriter
+                    , boost::ref( std::cout )
+                    , boost::ref( responseQueue )
                     )
                );
 

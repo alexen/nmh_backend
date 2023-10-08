@@ -26,5 +26,14 @@ struct Response {
 };
 
 
+ResponsePtr makeResponse(
+     unsigned sourceMessageId
+     , const std::string& status
+     , const std::string& result
+);
+ResponsePtr makeErrorResponse( unsigned sourceMessageId, const std::string& error );
+ResponsePtr makeErrorResponse( const std::string& error );
+
+
 } // namespace nmh
 } // namespace alexen

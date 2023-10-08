@@ -11,6 +11,8 @@
 
 #include <tools/mt/queue.h>
 
+#include <handlers/handler.h>
+
 
 namespace alexen {
 namespace nmh {
@@ -26,7 +28,7 @@ namespace workers {
 
 void istreamListener( std::istream&, RequestQueue&, ResponseQueue& );
 void ostreamWriter( std::ostream&, ResponseQueue& );
-void requestProcessor( RequestQueue&, ResponseQueue& );
+void requestProcessor( RequestQueue&, ResponseQueue&, const handler::IHandlerMap& );
 
 
 } // namespace workers
