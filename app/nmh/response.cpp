@@ -31,7 +31,7 @@ void put( boost::property_tree::ptree& ptree, const std::string& key, const boos
 {
      if( value )
      {
-          ptree.put( key, value );
+          ptree.put( key, *value );
      }
 }
 
