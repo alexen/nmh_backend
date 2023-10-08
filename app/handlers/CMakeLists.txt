@@ -7,3 +7,4 @@ target_sources(
      PUBLIC
           echo.h
 )
+install(TARGETS ${THIS})
