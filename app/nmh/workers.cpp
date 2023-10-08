@@ -35,14 +35,6 @@ namespace workers {
 
 void istreamListener( std::istream& is, RequestQueue& requestQueue, ResponseQueue& responseQueue )
 {
-     static const auto makeErrorResponse = []( const std::string& message ){
-          auto response = boost::make_shared< Response >();
-          response->status = "error";
-          response->error = message;
-          response->timestamp = boost::posix_time::second_clock::local_time();
-          return response;
-     };
-
      BOOST_LOG_TRIVIAL( info ) << __FUNCTION__ << " started";
 
      try
@@ -61,7 +53,7 @@ void istreamListener( std::istream& is, RequestQueue& requestQueue, ResponseQueu
                {
                     BOOST_LOG_TRIVIAL( error )
                          << "exception: " << boost::current_exception_diagnostic_information();
-                    responseQueue.push( std::move( makeErrorResponse( e.what() ) ) );
+                    responseQueue.push( makeErrorResponse( e.what() ) );
                }
 
                request.str( {} );
@@ -107,7 +99,11 @@ void ostreamWriter( std::ostream& os, ResponseQueue& responseQueue )
 }
 
 
-void requestProcessor( RequestQueue& requestQueue, ResponseQueue& responseQueue )
+void requestProcessor(
+     RequestQueue& requestQueue
+     , ResponseQueue& responseQueue
+     , const handler::IHandlerMap& handlers
+)
 {
      BOOST_LOG_TRIVIAL( info ) << __FUNCTION__ << " started";
 
@@ -118,14 +114,33 @@ void requestProcessor( RequestQueue& requestQueue, ResponseQueue& responseQueue 
                const auto request = requestQueue.pop();
                BOOST_LOG_TRIVIAL( info ) << "Processing: " << *request;
 
-               auto response = boost::make_shared< Response >();
+               try
+               {
+                    const auto handler = handlers.find( request->module );
+                    if( handler == handlers.end() )
+                    {
+                         BOOST_THROW_EXCEPTION( std::runtime_error{ "module not found" } );
+                    }
 
-               response->replyTo = request->id;
-               response->result = "This is response message";
-               response->status = "processed";
-               response->timestamp = boost::posix_time::second_clock::local_time();
+                    std::istringstream iss{ request->data };
+                    std::ostringstream oss;
 
-               responseQueue.push( std::move( response ) );
+                    handler->second->process( request->method, iss, oss );
+
+                    responseQueue.push(
+                         makeResponse(
+                              request->id
+                              , "processed"
+                              , oss.str()
+                              )
+                         );
+               }
+               catch( const std::exception& e )
+               {
+                    BOOST_LOG_TRIVIAL( error )
+                         << "exception: " << boost::current_exception_diagnostic_information();
+                    responseQueue.push( makeErrorResponse( request->id, e.what() ) );
+               }
           }
      }
      catch( const std::exception& )

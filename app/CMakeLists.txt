@@ -2,6 +2,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 add_subdirectory("nmh")
 add_subdirectory("tools")
+add_subdirectory("handlers")
 
 set(THIS ${PROJECT_NAME})
 
@@ -18,6 +19,7 @@ target_link_libraries(
      PRIVATE
           nmh
           tools
+          handlers
           Boost::log_setup
 )
 

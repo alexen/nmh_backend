@@ -4,6 +4,7 @@
 
 #include <nmh/response.h>
 
+#include <boost/make_shared.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/date_time/posix_time/time_formatters.hpp>
@@ -30,7 +31,7 @@ void put( boost::property_tree::ptree& ptree, const std::string& key, const boos
 {
      if( value )
      {
-          ptree.put( key, value );
+          ptree.put( key, *value );
      }
 }
 
@@ -58,6 +59,42 @@ void Response::serialize( std::ostream& os )
      impl::json::put( root, "timestamp", timestamp );
 
      boost::property_tree::write_json( os, root );
+}
+
+
+ResponsePtr makeResponse(
+     unsigned sourceMessageId
+     , const std::string& status
+     , const std::string& result
+)
+{
+     auto response = boost::make_shared< Response >();
+     response->replyTo = sourceMessageId;
+     response->status = status;
+     response->result = result;
+     response->timestamp = boost::posix_time::second_clock::local_time();
+     return response;
+}
+
+
+ResponsePtr makeErrorResponse( unsigned sourceMessageId, const std::string& error )
+{
+     auto response = boost::make_shared< Response >();
+     response->replyTo = sourceMessageId;
+     response->status = "error";
+     response->error = error;
+     response->timestamp = boost::posix_time::second_clock::local_time();
+     return response;
+}
+
+
+ResponsePtr makeErrorResponse( const std::string& error )
+{
+     auto response = boost::make_shared< Response >();
+     response->status = "error";
+     response->error = error;
+     response->timestamp = boost::posix_time::second_clock::local_time();
+     return response;
 }
 
 
