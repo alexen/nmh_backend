@@ -57,7 +57,8 @@ void write( boost::string_view data, std::ostream& os )
 
      const std::uint32_t len = data.size();
      os.write( reinterpret_cast< const char* >( &len ), sizeof( len ) )
-          << data;
+          << data
+          << std::flush;
 }
 
 
