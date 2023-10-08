@@ -7,4 +7,9 @@ target_sources(
      PUBLIC
           echo.h
 )
+target_link_libraries(
+     ${THIS}
+     PRIVATE
+          Boost::log
+)
 install(TARGETS ${THIS})

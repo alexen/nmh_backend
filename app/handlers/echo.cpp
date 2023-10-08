@@ -23,6 +23,7 @@ boost::string_view EchoHandler::name() const noexcept
 
 void EchoHandler::process( const boost::string_view method, std::istream& is, std::ostream& os )
 {
+     BOOST_LOG_TRIVIAL( info ) << name() << ": received call method " << method;
      if( method == "echo" )
      {
           echo( is, os );
@@ -36,6 +37,7 @@ void EchoHandler::process( const boost::string_view method, std::istream& is, st
 
 void EchoHandler::echo( std::istream& is, std::ostream& os )
 {
+     BOOST_LOG_TRIVIAL( info ) << name() << ": " << __FUNCTION__ << " is working";
      boost::iostreams::copy( is, os );
 }
 
