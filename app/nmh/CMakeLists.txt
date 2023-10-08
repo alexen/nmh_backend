@@ -2,12 +2,23 @@ set(THIS nmh)
 
 add_library(${THIS})
 
+target_compile_definitions(
+     ${THIS}
+     PRIVATE
+          BOOST_BIND_GLOBAL_PLACEHOLDERS
+)
 target_sources(
      ${THIS}
      PRIVATE
-          nmh.cpp
+          io.cpp
+          request.cpp
+          response.cpp
+          workers.cpp
      PUBLIC
-          nmh.h
+          io.h
+          request.h
+          response.h
+          workers.h
 )
 target_link_libraries(
      ${THIS}
@@ -21,7 +32,7 @@ if(BUILD_TESTING)
      target_sources(
           ${UNIT_TEST}
           PRIVATE
-               test/nmh_test.cpp
+               test/io_test.cpp
      )
      target_link_libraries(
           ${UNIT_TEST}
