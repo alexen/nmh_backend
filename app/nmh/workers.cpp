@@ -11,6 +11,8 @@
 #include <boost/date_time/local_time/local_time.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 #include <boost/thread/tss.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/device/back_inserter.hpp>
 
 #include <nmh/io.h>
 
@@ -122,18 +124,18 @@ void requestProcessor(
                          BOOST_THROW_EXCEPTION( std::runtime_error{ "module not found" } );
                     }
 
-                    std::istringstream iss{ request->data };
-                    std::ostringstream oss;
+                    auto response = makeResponse( request->id, "processed", {} );
 
-                    handler->second->process( request->method, iss, oss );
+                    boost::iostreams::filtering_istream is {
+                         boost::make_iterator_range( request->data )
+                    };
+                    boost::iostreams::filtering_ostream os {
+                         boost::iostreams::back_inserter( *response->result )
+                    };
 
-                    responseQueue.push(
-                         makeResponse(
-                              request->id
-                              , "processed"
-                              , oss.str()
-                              )
-                         );
+                    handler->second->process( request->method, is, os );
+
+                    responseQueue.push( response );
                }
                catch( const std::exception& e )
                {
