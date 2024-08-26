@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( WriteNonemptyData )
      BOOST_TEST( len == source.size() );
 
      std::string data( len, 0 );
-     BOOST_TEST( !!ioss.read( data.data(), len ) );
+     BOOST_TEST( !!ioss.read( const_cast< char* >( data.data() ), len ) );
      BOOST_TEST( data == source );
 }
 BOOST_AUTO_TEST_SUITE_END() // Write

@@ -2,6 +2,7 @@
 /// @brief
 /// @copyright Copyright 2023 InfoTeCS Internet Trust
 
+#include <vector>
 #include <iostream>
 
 #include <boost/log/trivial.hpp>
