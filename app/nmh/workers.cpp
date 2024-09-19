@@ -55,7 +55,7 @@ void istreamListener( std::istream& is, RequestQueue& requestQueue, ResponseQueu
                {
                     BOOST_LOG_TRIVIAL( error )
                          << "exception: " << boost::current_exception_diagnostic_information();
-                    responseQueue.push( makeErrorResponse( e.what() ) );
+                    responseQueue.push( makeErrorResponse( e.what(), {{ "body", request.str() }} ) );
                }
 
                request.str( {} );
