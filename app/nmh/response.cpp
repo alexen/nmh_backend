@@ -26,19 +26,30 @@ void put( boost::property_tree::ptree& ptree, const std::string& key, const T& v
 }
 
 
+void put( boost::property_tree::ptree& ptree, const std::string& key, const std::map< std::string, std::string >& kvargs )
+{
+     boost::property_tree::ptree branch;
+     for( auto&& each: kvargs )
+     {
+          put( branch, each.first, each.second );
+     }
+     ptree.add_child( key, branch );
+}
+
+
 template< typename T >
 void put( boost::property_tree::ptree& ptree, const std::string& key, const boost::optional< T >& value )
 {
      if( value )
      {
-          ptree.put( key, *value );
+          put( ptree, key, *value );
      }
 }
 
 
 void put( boost::property_tree::ptree& ptree, const std::string& key, const boost::posix_time::ptime& value )
 {
-     ptree.put( key, boost::posix_time::to_iso_extended_string( value ) );
+     put( ptree, key, boost::posix_time::to_iso_extended_string( value ) );
 }
 
 
@@ -56,6 +67,7 @@ void Response::serialize( std::ostream& os )
      impl::json::put( root, "replyTo", replyTo );
      impl::json::put( root, "result", result );
      impl::json::put( root, "error", error );
+     impl::json::put( root, "details", details );
      impl::json::put( root, "timestamp", timestamp );
 
      boost::property_tree::write_json( os, root );
@@ -88,11 +100,15 @@ ResponsePtr makeErrorResponse( unsigned sourceMessageId, const std::string& erro
 }
 
 
-ResponsePtr makeErrorResponse( const std::string& error )
+ResponsePtr makeErrorResponse( const std::string& error, Response::Details&& details )
 {
      auto response = boost::make_shared< Response >();
      response->status = "error";
      response->error = error;
+     if( !details.empty() )
+     {
+          response->details = std::move( details );
+     }
      response->timestamp = boost::posix_time::second_clock::local_time();
      return response;
 }
