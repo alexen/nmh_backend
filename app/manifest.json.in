@@ -4,8 +4,6 @@
   "path": "@CMAKE_INSTALL_PREFIX@/@CMAKE_INSTALL_BINDIR@/@PROJECT_NAME@",
   "type": "stdio",
   "allowed_origins": [
-     "chrome-extension://bjfmhckbclleegmnkjhdmlfbaljecjff/",
-     "chrome-extension://hdljlmlimlofikgjfgbgbcolbkcgbbld/",
-     "chrome-extension://bbchhamfonjikandmfnbodbnndocfelp/"
+     "chrome-extension://ldiohhbcdlohmckbfdogpaofcnmpepng/"
   ]
 }
